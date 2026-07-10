@@ -1,0 +1,22 @@
+const paginationMiddleware = (req, res, next) => {
+  let page = parseInt(req.query.page, 10);
+
+  if (isNaN(page) || page <= 0) {
+    page = 1;
+  } else {
+    page++;
+  }
+  const limit = parseInt(req.query.limit, 10) || 10;
+
+  const offset = (page - 1) * limit;
+
+  req.pagination = {
+    page,
+    limit,
+    offset,
+  };
+
+  next();
+};
+
+module.exports = paginationMiddleware;

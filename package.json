@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "react-swipeable-views": "^0.14.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+    "start": "concurrently --names \"Applicant,Office,API\" --prefix-colors \"green,magenta,blue\" \"npm --prefix web/jcds-applicant run dev\" \"npm --prefix web/jcds-office start\" \"npm --prefix api/JCDS-API run dev\""
+  }
+}

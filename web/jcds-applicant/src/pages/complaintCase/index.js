@@ -1,0 +1,9 @@
+export { default as ComplaintRequestForm } from "./ComplaintRequestForm";
+export { default as ComplaintRequestForm2 } from "./complaintRequestForm2";
+export { default as ComplaintRequestForm3 } from "./complaintRequestForm3";
+export { default as NewComplaintRequestForm } from "./newComplaintRequestForm";
+export { default as ViewDetailComplaint } from "./viewDetailComplaint";
+export { default as ViewDetailComplaint2 } from "./viewDetailComplaint2";
+export { default as ViewDetailComplaint3 } from "./viewDetailComplaint3";
+export { default as EditComplaint } from "./editComplaint";
+export { default as NewEditComplaint } from "./newEditComplaint";

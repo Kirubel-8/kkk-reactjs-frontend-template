@@ -1,0 +1,187 @@
+import { useLoading } from "@/loading-context";
+import requestService from "@/service/request.service";
+
+import appealService from "@/service/appeal.service";
+import { ArrowBackIos } from "@mui/icons-material";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { NavLink, useLocation } from "react-router-dom";
+import { DECISION_DOCUMENT_URL } from "../../../config";
+import AppealCase from "./AppealCase";
+import CaseSide from "./CaseSide";
+const CaseDecision = () => {
+  const { t } = useTranslation();
+
+  const location = useLocation();
+  const request_id = location.state;
+  const [requestsData, setRequestsData] = useState({});
+  const { startLoading, stopLoading } = useLoading();
+  const [loading, setLoading] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [caseId, setCaseId] = useState(null);
+  const [requestedFiles, setRequestedFiles] = useState([]);
+  const [selectedTab, setSelectedTab] = useState("all");
+  const fileInputRef = useRef(null);
+  const [appeal, setAppeal] = useState(false);
+
+  const [archiveNumber, setArchiveNumber] = useState();
+  const [reportedDate, setReportedDate] = useState();
+  const [decisionDate, setDecisionDate] = useState("12/03/2025");
+  const [decisionStatus, setDecisionStatus] = useState();
+
+  const [pdfUrl, setPdfUrl] = useState();
+
+  const fetchDocumentStatusCount = async (request_id) => {
+    try {
+      const response =
+        await requestService.getRequestDocumentStatusCount(request_id);
+
+      const { approved, pending, rejected } = response;
+
+      return { approved, pending, rejected };
+    } catch (error) {
+      console.error("Error fetching document status count:", error);
+      return {
+        status: "error",
+        message: "Unable to fetch document status counts",
+        approved: -1,
+        pending: -1,
+        rejected: -1,
+      };
+    }
+  };
+
+  useEffect(() => {
+    const fetchRequestsData = async () => {
+      try {
+        setLoading(true);
+        startLoading();
+        const data = await requestService.getRequestById(request_id);
+
+        const request = data;
+        const reportDate = request.request_date;
+        setReportedDate(reportDate);
+        const documentStatusCount = await fetchDocumentStatusCount(
+          request.request_id
+        );
+        const requestDocuments = await fetchDocuments(request.request_id);
+        const complaintDocuments = requestDocuments.filter(
+          (document) => document.document_type === "complaint document"
+        );
+        const representativeDocuments = requestDocuments.filter(
+          (document) => document.document_type !== "complaint document"
+        );
+
+        const enrichedRequest = {
+          ...request,
+          documents: complaintDocuments,
+          representativeDocuments: representativeDocuments,
+          documentStatusCount,
+        };
+
+        setRequestsData(enrichedRequest);
+        if (data.archives && data.archives.length > 0) {
+          const case_id = data.archives[0].caseId;
+          setCaseId(case_id);
+          const archiveNumber = data.archives[0].archiveNumber;
+
+          setArchiveNumber(archiveNumber);
+          const decisionResponse =
+            await appealService.getDecisionByCaseId(case_id);
+          const filePath = decisionResponse.data.file_path;
+          console.log("decisionResponse :", decisionResponse)
+
+          const decisionDate = decisionResponse?.data?.minute?.meeting_date;
+          const decisionStatus = decisionResponse?.status;
+
+          setDecisionDate(decisionDate);
+          setDecisionStatus(decisionStatus)
+
+          const pdfUrl = `${DECISION_DOCUMENT_URL}/${filePath}`;
+          console.log("PDF URL:", pdfUrl);
+          setPdfUrl(pdfUrl);
+          const responseAppeal = await appealService.getAppealByCaseId(case_id);
+          setAppeal(responseAppeal[0]);
+        }
+        setTimeout(() => {
+          setLoading(false);
+        }, 3000);
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
+        stopLoading();
+      } catch (error) {
+        console.error("Error fetching request data:", error);
+        stopLoading();
+      } finally {
+        stopLoading();
+      }
+    };
+    fetchRequestsData();
+
+    const fetchDocuments = async () => {
+      try {
+        const response = await requestService.getRequestDocuments(request_id);
+        setDocuments(response.documents);
+        return response.documents;
+      } catch (error) {
+        console.error("Error fetching documents:", error);
+      }
+    };
+
+    const fetchRequestedFiles = async () => {
+      try {
+        // const files = await RequestedFileService.getRequestedFiles(request_id);
+        // setRequestedFiles(files.documents);
+      } catch (error) {
+        console.error("Error fetching requested documents:", error);
+      }
+    };
+
+    if (request_id) {
+      fetchDocuments();
+      fetchRequestedFiles();
+    }
+  }, [request_id]);
+
+  return (
+    <div className="p-10">
+      <div className="flex gap-2 p-4 items-center">
+        <NavLink
+          to={`/home/requests`}
+          className="inline-flex items-center p-2 rounded-full transition-all duration-200 hover:text-gray-100 "
+        >
+          <ArrowBackIos className="text-[#4475F2]" fontSize="small" />
+          <h2 className="text-[#4475F2] font-bold">Case Decision</h2>
+        </NavLink>
+      </div>
+
+      <div className="flex flex-col  lg:flex lg:flex-row lg:justify-between gap-4">
+        <CaseSide requestsData={requestsData} />
+        <div className="w-full h-96 lg:h-auto lg:w-2/3 lg:ml-auto">
+          <iframe
+            src={pdfUrl}
+            className="w-full h-full border-0"
+            style={{
+              backgroundColor: "white",
+              boxShadow: "none",
+              display: "block",
+            }}
+          />
+        </div>
+        {decisionStatus === "approved" &&
+          (<AppealCase
+            referenceNumber={null}
+            archiveNumber={archiveNumber}
+            reportedDate={reportedDate}
+            decisionDate={decisionDate}
+            caseId={caseId}
+            appeal={appeal}
+            requestsData={requestsData}
+          />)}
+      </div>
+    </div>
+  );
+};
+
+export default CaseDecision;

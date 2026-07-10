@@ -1,0 +1,429 @@
+import { useLoading } from "@/loading-context";
+import ConfirmDialog from "@/pages/requestManagement/delete-modal";
+import requestService from "@/service/request.service";
+import { UserIcon } from "@heroicons/react/24/solid";
+import { Card, Typography } from "@material-tailwind/react";
+import PropTypes from "prop-types";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+export function StatisticsCardRespondent({
+  icon,
+  respondentName,
+  respondentRegions,
+  respondentZones,
+  respondentWoredas,
+  respondentCity,
+  respondentSubCity,
+  respondentPhoneNumber,
+  respondentAddress,
+  status,
+  representative,
+  region,
+  zone,
+  city,
+  subCity,
+  requestDate,
+  request_id,
+  onDelete,
+}) {
+  const { t } = useTranslation();
+  const { startLoading, stopLoading } = useLoading();
+  const navigate = useNavigate();
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+
+  const handleNavigation = (path) => {
+    startLoading();
+    setTimeout(() => {
+      navigate(path);
+      stopLoading();
+    }, 100);
+  };
+  const handleDeleteNavigation = (path) => {
+    startLoading();
+    setTimeout(() => {
+      navigate(path);
+      stopLoading();
+    }, 1000);
+  };
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    setOpenConfirmDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setOpenConfirmDialog(false);
+    startLoading();
+    try {
+      const response = await requestService.deleteRequest(request_id);
+      console.log(response);
+      if (response.status === 204) {
+        toast.success("Request deleted successfully");
+        onDelete(request_id);
+        handleDeleteNavigation("/home/requests");
+      } else {
+        toast.error("Failed to delete request");
+        handleDeleteNavigation("/home/requests");
+      }
+    } catch (error) {
+      toast.error("Error deleting request");
+      handleDeleteNavigation("/home/requests");
+      console.error(error);
+    } finally {
+      stopLoading();
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenConfirmDialog(false);
+  };
+
+  return (
+    <>
+      <Card className="w-full my-2 max-w-md sm:max-w-lg lg:max-w-xl h-80 rounded-lg shadow-sm p-2">
+        <div className="flex flex-col gap-2">
+          <div className="text-center">
+            <Typography variant="h6" color="blue-gray" className="font-medium">
+              {t("home.respondentDetail")}
+            </Typography>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="w-12 h-12 flex justify-center bg-[#416FE429] items-center text-[#a8bef0] border rounded-lg">
+              <UserIcon className="w-5 h-5 " />
+            </div>
+            <div>
+              <div className="relative group inline-block max-w-[200px]">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-medium truncate"
+                >
+                  {respondentName.length > 20
+                    ? `${respondentName.slice(0, 20)}...`
+                    : respondentName}
+                </Typography>
+                <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                  {respondentName}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="px-5 pb-3 flex gap-10 mt-3 items-center ">
+            <div className="flex flex-col space-y-3">
+              <div className="group relative inline-block items-center">
+                <Typography
+                  variant="small"
+                  className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                >
+                  {t("home.respondentName").length > 10
+                    ? `${t("home.respondentName").slice(0, 5)}...${t(
+                        "home.respondentName"
+                      ).slice(10)}`
+                    : t("home.respondentName")}
+                </Typography>
+                <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                  {t("home.respondentName")}
+                </span>
+              </div>
+              {respondentPhoneNumber && (
+                <div className="group relative inline-block items-center">
+                  <Typography
+                    variant="small"
+                    className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                  >
+                    {t("home.respondentPhoneNumber").length > 10
+                      ? `${t("home.respondentPhoneNumber").slice(0, 5)}...${t(
+                          "home.respondentPhoneNumber"
+                        ).slice(10)}`
+                      : t("home.respondentPhoneNumber")}
+                  </Typography>
+                  <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {t("home.respondentPhoneNumber")}
+                  </span>
+                </div>
+              )}
+              {respondentAddress && (
+                <div className="group relative inline-block items-center">
+                  <Typography
+                    variant="small"
+                    className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                  >
+                    {t("home.respondentAddress").length > 10
+                      ? `${t("home.respondentAddress").slice(0, 5)}...${t(
+                          "home.respondentAddress"
+                        ).slice(10)}`
+                      : t("home.respondentAddress")}
+                  </Typography>
+                  <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {t("home.respondentAddress")}
+                  </span>
+                </div>
+              )}
+              {respondentRegions && (
+                <div className="group relative inline-block items-center">
+                  <Typography
+                    variant="small"
+                    className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                  >
+                    {t("home.region").length > 10
+                      ? `${t("home.region").slice(0, 5)}...${t(
+                          "home.region"
+                        ).slice(10)}`
+                      : t("home.region")}
+                  </Typography>
+                  <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {t("home.region")}
+                  </span>
+                </div>
+              )}
+              {respondentZones && (
+                <div className="group relative inline-block items-center">
+                  <Typography
+                    variant="small"
+                    className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                  >
+                    {t("home.zone").length > 10
+                      ? `${t("home.zone").slice(0, 5)}...${t("home.zone").slice(
+                          10
+                        )}`
+                      : t("home.zone")}
+                  </Typography>
+                  <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {t("home.zone")}
+                  </span>
+                </div>
+              )}
+              {respondentCity && (
+                <div className="group relative inline-block items-center">
+                  <Typography
+                    variant="small"
+                    className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                  >
+                    {t("home.city").length > 10
+                      ? `${t("home.city").slice(0, 5)}...${t("home.city").slice(
+                          10
+                        )}`
+                      : t("home.city")}
+                  </Typography>
+                  <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {t("home.city")}
+                  </span>
+                </div>
+              )}
+              {respondentSubCity && (
+                <div className="group relative inline-block items-center">
+                  <Typography
+                    variant="small"
+                    className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                  >
+                    {t("home.subCity").length > 10
+                      ? `${t("home.subCity").slice(0, 5)}...${t(
+                          "home.subCity"
+                        ).slice(10)}`
+                      : t("home.subCity")}
+                  </Typography>
+                  <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {t("home.zone")}
+                  </span>
+                </div>
+              )}
+              {respondentWoredas && (
+                <div className="group relative inline-block items-center">
+                  <Typography
+                    variant="small"
+                    className="text-[12px] font-medium text-blue-gray-600 truncate max-w-[100px]" // adjust max-w as needed
+                  >
+                    {t("home.woreda").length > 10
+                      ? `${t("home.woreda").slice(0, 5)}...${t(
+                          "home.woreda"
+                        ).slice(10)}`
+                      : t("home.woreda")}
+                  </Typography>
+                  <span className="absolute hidden group-hover:block z-10 bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {t("home.woreda")}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="relative group inline-block max-w-[100px]">
+                  <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-medium text-[13px] text-[#003eed] truncate"
+                  >
+                    {respondentName.length > 20
+                      ? `${respondentName.slice(0, 20)}...`
+                      : respondentName}
+                  </Typography>
+                  <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                    {respondentName}
+                  </div>
+                </div>
+              </div>
+              {respondentPhoneNumber && (
+                <div className="flex justify-between">
+                  <div className="relative group inline-block max-w-[100px]">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium text-[13px] text-[#003eed] truncate"
+                    >
+                      {respondentPhoneNumber.length > 20
+                        ? `${respondentPhoneNumber.slice(0, 20)}...`
+                        : respondentPhoneNumber}
+                    </Typography>
+                    <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                      {respondentPhoneNumber}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {respondentAddress && (
+                <div className="flex justify-between">
+                  <div className="relative group inline-block max-w-[100px]">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium text-[13px] text-[#003eed] truncate"
+                    >
+                      {respondentAddress.length > 20
+                        ? `${respondentAddress.slice(0, 20)}...`
+                        : respondentAddress}
+                    </Typography>
+                    <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                      {respondentAddress}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {respondentRegions && (
+                <div className="flex justify-between">
+                  <div className="relative group inline-block max-w-[100px]">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium text-[13px] text-[#003eed] truncate"
+                    >
+                      {respondentRegions.length > 20
+                        ? `${respondentRegions.slice(0, 20)}...`
+                        : respondentRegions}
+                    </Typography>
+                    <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                      {respondentRegions}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {respondentZones && (
+                <div className="flex justify-between">
+                  <div className="relative group inline-block max-w-[100px]">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium text-[13px] text-[#003eed] truncate"
+                    >
+                      {respondentZones.length > 20
+                        ? `${respondentZones.slice(0, 20)}...`
+                        : respondentZones}
+                    </Typography>
+                    <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                      {respondentZones}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {respondentCity && (
+                <div className="flex justify-between">
+                  <div className="relative group inline-block max-w-[100px]">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium text-[13px] text-[#003eed] truncate"
+                    >
+                      {respondentCity.length > 20
+                        ? `${respondentCity.slice(0, 20)}...`
+                        : respondentCity}
+                    </Typography>
+                    <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                      {respondentCity}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {respondentSubCity && (
+                <div className="flex justify-between">
+                  <div className="relative group inline-block max-w-[100px]">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium text-[13px] text-[#003eed] truncate"
+                    >
+                      {respondentSubCity.length > 20
+                        ? `${respondentSubCity.slice(0, 20)}...`
+                        : respondentSubCity}
+                    </Typography>
+                    <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                      {respondentSubCity}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {respondentWoredas && (
+                <div className="flex justify-between">
+                  <div className="relative group inline-block max-w-[100px]">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium text-[13px] text-[#003eed] truncate"
+                    >
+                      {respondentWoredas.length > 20
+                        ? `${respondentWoredas.slice(0, 20)}...`
+                        : respondentWoredas}
+                    </Typography>
+                    <div className="absolute z-10 hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
+                      {respondentWoredas}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <ConfirmDialog
+        open={openConfirmDialog}
+        onClose={handleCloseDialog}
+        onConfirm={handleConfirmDelete}
+        title="Are you sure?"
+        description="Do you really want to delete this request? This process cannot be undone."
+      />
+    </>
+  );
+}
+
+StatisticsCardRespondent.defaultProps = {
+  representative: false,
+  status: "Pending",
+  respondentName: "N/A",
+  requestDate: "N/A",
+};
+
+StatisticsCardRespondent.propTypes = {
+  icon: PropTypes.node.isRequired,
+  respondentName: PropTypes.string.isRequired,
+  status: PropTypes.string,
+  representative: PropTypes.bool,
+  // respondentName: PropTypes.string,
+  requestDate: PropTypes.string,
+  onDelete: PropTypes.func.isRequired,
+};
+
+export default StatisticsCardRespondent;
