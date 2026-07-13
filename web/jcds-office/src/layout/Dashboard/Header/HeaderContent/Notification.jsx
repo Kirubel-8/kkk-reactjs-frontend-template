@@ -35,9 +35,6 @@ import MessageOutlined from '@ant-design/icons/MessageOutlined';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-// service
-import informExpertService from '../../../../service/informExpert.service';
-
 // sx styles
 const avatarSX = { width: 36, height: 36, fontSize: '1rem' };
 const actionSX = { mt: '6px', ml: 1, alignSelf: 'flex-start', transform: 'none' };

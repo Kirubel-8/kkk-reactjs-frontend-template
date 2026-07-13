@@ -25,9 +25,9 @@ export default function DashboardLayout() {
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
   const {user, token, setUser, setToken} = useStateContext();
 
-    if (!token) {
-    return <Navigate to="/login" />;
-  }
+  //   if (!token) {
+  //   return <Navigate to="/login" />;
+  // }
   useEffect(() => {
     handlerDrawerOpen(!downXL);
     // eslint-disable-next-line react-hooks/exhaustive-deps

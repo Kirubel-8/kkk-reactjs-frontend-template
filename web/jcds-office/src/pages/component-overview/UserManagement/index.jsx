@@ -12,7 +12,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import BrushIcon from "@mui/icons-material/Brush";
 import { BadgeOutlined, Person, Settings, Notifications, Description } from "@mui/icons-material";
 import { useStateContext } from '../../../routes/contextProvider';
-import authService from "../../../service/auth.service";
+// import authService from "../../../service/auth.service";
 import { jwtDecode } from "jwt-decode";
 import userService from '../../../service/user.service';
 import { Phone, Email } from "@mui/icons-material";

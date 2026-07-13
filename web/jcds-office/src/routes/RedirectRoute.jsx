@@ -8,7 +8,7 @@ const RedirectRoute = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
 
-    if (token) {
+    if (!token) {
       navigate('/'); 
     } else {
       navigate('/login'); 
